@@ -2,6 +2,15 @@
 library(optparse)
 library(clusterProfiler)
 library(org.Hs.eg.db)
+library(AnnotationDbi)
+
+convert_ids_to_entrez <- function(ids, gene_keytype){
+  possible_ids <- columns(org.Hs.eg.db)
+  if(! gene_keytype %in% possible_ids) 
+    stop(paste(c("gene keytype must be one of the following:", possible_ids), collapse=" "))
+  mapIds(org.Hs.eg.db, keys=ids, column="ENTREZID", keytype=gene_keytype)
+}
+
 
 option_list <- list(
   optparse::make_option(c("-i", "--input_file"), type="character", default=NULL,
@@ -9,15 +18,23 @@ option_list <- list(
   optparse::make_option(c("-w", "--workers"), type="integer", default=1,
                         help="number of processes for parallel execution"),
   optparse::make_option(c("-t", "--task_size"), type="integer", default=1,
-                        help="number of clusters per task")
+                        help="number of clusters per task"),
+  optparse::make_option(c("-k", "--gene_keytype"), type="character", default="ENTREZID",
+                        help="What identifier is being used for the genes in the clusters?")
 )
 opt <- optparse::parse_args(optparse::OptionParser(option_list=option_list))
 
 cluster_genes <- read.table(opt$input_file, header=TRUE)
 cluster_genes_list <- strsplit(cluster_genes[,2], ",")
+if(opt$gene_keytype != "ENTREZID") {
+  cluster_genes_list <- sapply(cluster_genes_list, function(x) convert_ids_to_entrez(ids=x, gene_keytype=opt$gene_keytype))
+}
 names(cluster_genes_list) <- cluster_genes[,1]
+#print(cluster_genes_list)
+#save.image()
+#q()
 
-for(ont in c("MF", "BP", "CC")) {
+for(ont in c("MF", "CC", "BP")) {
   ENRICH_DATA <- clusterProfiler:::get_GO_data(org.Hs.eg.db::org.Hs.eg.db, ont, "ENTREZID")
   enrf <- clusterProfiler::enrichGO
   patter_to_remove <- "GO_DATA *<-"
