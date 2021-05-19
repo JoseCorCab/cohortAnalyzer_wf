@@ -1,22 +1,27 @@
 merge_and_compute_IC){
-	~soft_bio_267/initializes/init_pets
+	resources: -t '01:00:00'
+	source ~soft_bio_267/initializes/init_pets
+	export PATH=/mnt/home/users/bio_267_uma/josecordoba/software/pets/bin:$PATH
 	?
 	generate_HPO_IC_table.rb -b $HPO -i "$cohorts_path/*.txt" -o HPO_IC.txt
 }
 
 analyze_raw_cohort_[$all_cohorts]){
-	~soft_bio_267/initializes/init_pets
-	cust_opt=`grep (*) $custom_options | cut -d "\t" -f 2`
+	resources: -m '20gb'
+	source ~soft_bio_267/initializes/init_pets
+	cust_opt=`grep (*) $custom_options | cut -f 2`
 	?	 
-	coPatReporter -i $cohorts_path/(*).txt -o results_(*) -m '' -p phenotypes -T 2 $cust_opt
+	coPatReporter.rb -i $cohorts_path/(*).txt -o results_(*) -m '' -p phenotypes -T 2 $cust_opt
 	# coPatReporter -i $cohorts_path/(*).txt -o results_(*) --new_param merge_and_compute_IC)/HPO_IC.txt -m '' -p phenotypes -T 2 $cust_opt
 }
 
 clustering_processed_cohort_[$all_cohorts]){
-	~soft_bio_267/initializes/init_pets
-	cust_opt=`grep (*) $custom_options | cut -d "\t" -f 2`
+	resources: -m '20gb'
+	source ~soft_bio_267/initializes/init_pets
+	export PATH=/mnt/home/users/bio_267_uma/josecordoba/software/pets/bin:$PATH
+	cust_opt=`grep (*) $custom_options | cut -f 2`
 	filter_profiles.rb -i $cohorts_path/(*).txt -c "phenotypes" -p 2 -H -o processed_(*).txt
 	?	 
-	coPatReporter -i $dataset -o results_processed_(*) -m 'lin' -p phenotypes -T 2 $cust_opt
+	coPatReporter.rb -i processed_(*).txt -o results_processed_(*) -m 'lin' -p phenotypes -T 2 $cust_opt
 #	coPatReporter -i $dataset -o results_processed_(*) --new_param merge_and_compute_IC)/HPO_IC.txt -m 'lin' -p phenotypes -T 2 $cust_opt
 }
