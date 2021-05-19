@@ -11,8 +11,8 @@ analyze_raw_cohort_[$all_cohorts]){
 	source ~soft_bio_267/initializes/init_pets
 	cust_opt=`grep (*) $custom_options | cut -f 2`
 	?	 
-	coPatReporter.rb -i $cohorts_path/(*).txt -o results_(*) -m '' -p phenotypes -T 2 $cust_opt
-	# coPatReporter -i $cohorts_path/(*).txt -o results_(*) --new_param merge_and_compute_IC)/HPO_IC.txt -m '' -p phenotypes -T 2 $cust_opt
+	coPatReporter.rb -i $cohorts_path/(*).txt -o results_raw_(*) -m '' -p phenotypes -T 2 $cust_opt
+	# coPatReporter -i $cohorts_path/(*).txt -o results_raw_(*) --new_param merge_and_compute_IC)/HPO_IC.txt -m '' -p phenotypes -T 2 $cust_opt
 }
 
 clustering_processed_cohort_[$all_cohorts]){
