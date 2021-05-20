@@ -34,9 +34,10 @@ def load_and_parse_regions(regions_file)
 	patient_regions = {}
 	# PACO files: patient_id	chr	start	end	phenotypes
 	File.open(regions_file).each_with_index do |line, line_n|
-		next if line_n == 0
+		next if line_n == 0 
 		line = line.chomp.split("\t")
 		patient_id, chr, start, stop, phenotypes = line
+		next if chr == "-"
 		patient_regions[patient_id] = [] if patient_regions[patient_id].nil?
 		patient_regions[patient_id] << [chr.to_i, start.to_i, stop.to_i]
 	end
