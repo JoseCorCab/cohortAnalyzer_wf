@@ -75,7 +75,6 @@ names(cluster_genes_list) <- cluster_genes[,1]
 
 all_funsys <- c("MF", "CC", "BP")
 enrichments_ORA <- multienricher(all_funsys, cluster_genes_list, opt$task_size, opt$workers)
-save(enrichments_ORA, output_path, all_funsys, file = "test.RData")
 write_fun_enrichments(enrichments_ORA, output_path, all_funsys)
 
 
