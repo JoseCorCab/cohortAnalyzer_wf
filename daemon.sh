@@ -11,7 +11,7 @@ if [ ! -d $CODE_PATH/cohorts ]; then
 fi
 
 output_path=$SCRATCH/phenotypes/cohortAnalyzer_wf
-
+mkdir -p $output_path
 
 
 if [ "$mode" == "1" ]; then
@@ -33,10 +33,10 @@ if [ "$mode" == "1" ]; then
 
 elif [ "$mode" == "2" ]; then 
 
-	mkdir -p $output/results/general $output/results/clustering
-	cp $output_path/wf_performance/coPatReporter*/*.html $output/results
-	mv $output/results/*clusters.html $output/results/clustering
-	mv $output/results/*.html $output/results/general
+	mkdir -p $output_path/results/general $output_path/results/clustering
+	cp $output_path/wf_performance/coPatReporter*/*.html $output_path/results
+	mv $output_path/results/*clusters.html $output_path/results/clustering
+	mv $output_path/results/*.html $output_path/results/general
 
 fi
 
