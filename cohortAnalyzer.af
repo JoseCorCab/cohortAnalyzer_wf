@@ -8,11 +8,11 @@ merge_and_compute_IC){
 analyze_raw_cohort_[$all_cohorts]){
 	resources: -m '20gb'
 	source ~soft_bio_267/initializes/init_pets
-	cust_opt=`grep (*) $custom_options | cut -f 2`
+	cust_opt=`grep -P '^(*)' $custom_options | cut -f 2`
 	export ic_file=merge_and_compute_IC)/HPO_IC.txt 
 	?	 
-	# coPatReporter -i $cohorts_path/(*).txt -o results_raw_(*) -t freq_internal -m '' -p phenotypes -T 2 -f 2 -c chr -d patient_id -s start -e end $cust_opt
-	coPatReporter -i $cohorts_path/(*).txt -o results_raw_(*) -m '' -p phenotypes -T 2 -f 2 -c chr -d patient_id -s start -e end $cust_opt
+	coPatReporter.rb -i $cohorts_path/(*).txt -o results_raw_(*) -t freq_internal -m '' -p phenotypes -T [cpu] -f 2 -c chr -d patient_id -s start -e stop $cust_opt
+	# coPatReporter.rb -i $cohorts_path/(*).txt -o results_raw_(*) -m '' -p phenotypes -T [cpu] -f 2 -c chr -d patient_id -s start -e stop $cust_opt
 }
 
 filter_cohorts_[$all_cohorts]){
@@ -23,27 +23,27 @@ filter_cohorts_[$all_cohorts]){
 analyze_processed_cohort_IC_[$all_cohorts]){
 	resources: -m '20gb'
 	source ~soft_bio_267/initializes/init_pets
-	cust_opt=`grep (*) $custom_options | cut -f 2`
+	cust_opt=`grep -P '^(*)' $custom_options | cut -f 2`
 	?	 
-	coPatReporter -i !filter_cohorts_*!/processed_(*).txt -o result_processed_cohort_IC_(*) -m '' -p phenotypes -T 2 -f 2 -c chr -d patient_id -s start -e end $cust_opt
+	coPatReporter.rb -i !filter_cohorts_*!/processed_(*).txt -o result_processed_cohort_IC_(*) -m '' -p phenotypes -T [cpu] -f 2 -c chr -d patient_id -s start -e stop $cust_opt
 }
 
 clustering_processed_cohort_[$all_cohorts]){
 	resources: -m '20gb'
 	source ~soft_bio_267/initializes/init_pets
 	export ic_file=merge_and_compute_IC)/HPO_IC.txt
-	cust_opt=`grep (*) $custom_options | cut -f 2`
+	cust_opt=`grep -P '^(*)' $custom_options | cut -f 2`
 	?	 
-	# coPatReporter -i !filter_cohorts_*!/processed_(*).txt -o results_processed_(*) -t freq_internal -m 'lin' -p phenotypes -T 2 -f 2 -c chr -d patient_id -s start -e end $cust_opt
-	coPatReporter -i !filter_cohorts_*!/processed_(*).txt -o results_processed_(*) -m 'lin' -p phenotypes -T 2 -f 2 -c chr -d patient_id -s start -e end $cust_opt
+	coPatReporter.rb -i !filter_cohorts_*!/processed_(*).txt -o results_processed_(*) -t freq_internal -m 'lin' -p phenotypes -T [cpu] -f 2 -c chr -d patient_id -s start -e stop $cust_opt
+	# coPatReporter.rb -i !filter_cohorts_*!/processed_(*).txt -o results_processed_(*) -m 'lin' -p phenotypes -T [cpu] -f 2 -c chr -d patient_id -s start -e stop $cust_opt
 }
 
 cluster_fun_ORA_[$all_cohorts]){
 	resources: -m 20 -c 6
-	genome_version=`grep (*) $custom_options | cut -f 3`
+	genome_version=`grep -P '^(*)' $custom_options | cut -f 3`
 	mkdir temp
-	annotate_regions.rb -i !clustering_processed_cohort_*!/processed_(*).txt --gtf $annotation_path/$genome_version/annotation.gtf -o temp/patient_genes.txt
+	annotate_regions.rb -i !filter_cohorts_*!/processed_(*).txt --gtf $annotation_path'/'$genome_version'/annotation.gtf' -o temp/patient_genes.txt
 	get_cluster_genes.rb -c !clustering_processed_cohort_*!/temp/lin_clusters.txt -g temp/patient_genes.txt -o temp/cluster_genes.txt
 	?
-	clusters_to_enrichment.R -i temp/cluster_genes.txt -w 6 -t 4 -k "ENSEMBL" -o functional_enrichment
+	clusters_to_enrichment.R -i temp/cluster_genes.txt -w [cpu] -t 4 -k "ENSEMBL" -o functional_enrichment
 }
