@@ -44,9 +44,11 @@ def get_cluster_genes(patient_genes, patient_clusters)
 	cluster_genes = {}
 	patient_genes.each do |patient_id, genes|
 		cluster = patient_clusters[patient_id]
+		next if cluster.nil?
 		cluster_genes[cluster] = [] if cluster_genes[cluster].nil?
 		cluster_genes[cluster] = genes | cluster_genes[cluster]
 	end
+	return cluster_genes
 end
 
 def write_output(cluster_genes, output_file)
