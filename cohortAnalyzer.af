@@ -1,7 +1,6 @@
 merge_and_compute_IC){
 	resources: -t '01:00:00'
 	source ~soft_bio_267/initializes/init_pets
-	export PATH=/mnt/home/users/bio_267_uma/josecordoba/software/pets/bin:$PATH
 	?
 	generate_HPO_IC_table.rb -b $HPO -i "$cohorts_path/*.txt" -o HPO_IC.txt
 }
@@ -10,18 +9,41 @@ analyze_raw_cohort_[$all_cohorts]){
 	resources: -m '20gb'
 	source ~soft_bio_267/initializes/init_pets
 	cust_opt=`grep (*) $custom_options | cut -f 2`
+	export ic_file=merge_and_compute_IC)/HPO_IC.txt 
 	?	 
-	coPatReporter.rb -i $cohorts_path/(*).txt -o results_raw_(*) -m '' -p phenotypes -T 2 $cust_opt
-	# coPatReporter -i $cohorts_path/(*).txt -o results_raw_(*) --new_param merge_and_compute_IC)/HPO_IC.txt -m '' -p phenotypes -T 2 $cust_opt
+	# coPatReporter -i $cohorts_path/(*).txt -o results_raw_(*) -t freq_internal -m '' -p phenotypes -T 2 -f 2 -c chr -d patient_id -s start -e end $cust_opt
+	coPatReporter -i $cohorts_path/(*).txt -o results_raw_(*) -m '' -p phenotypes -T 2 -f 2 -c chr -d patient_id -s start -e end $cust_opt
+}
+
+filter_cohorts_[$all_cohorts]){
+	?
+	filter_profiles.rb -i $cohorts_path/(*).txt -c "phenotypes" -p 2 -H -o processed_(*).txt
+}
+
+analyze_processed_cohort_IC_[$all_cohorts]){
+	resources: -m '20gb'
+	source ~soft_bio_267/initializes/init_pets
+	cust_opt=`grep (*) $custom_options | cut -f 2`
+	?	 
+	coPatReporter -i !filter_cohorts_*!/processed_(*).txt -o result_processed_cohort_IC_(*) -m '' -p phenotypes -T 2 -f 2 -c chr -d patient_id -s start -e end $cust_opt
 }
 
 clustering_processed_cohort_[$all_cohorts]){
 	resources: -m '20gb'
 	source ~soft_bio_267/initializes/init_pets
-	export PATH=/mnt/home/users/bio_267_uma/josecordoba/software/pets/bin:$PATH
+	export ic_file=merge_and_compute_IC)/HPO_IC.txt
 	cust_opt=`grep (*) $custom_options | cut -f 2`
-	filter_profiles.rb -i $cohorts_path/(*).txt -c "phenotypes" -p 2 -H -o processed_(*).txt
 	?	 
-	coPatReporter.rb -i processed_(*).txt -o results_processed_(*) -m 'lin' -p phenotypes -T 2 $cust_opt
-#	coPatReporter -i $dataset -o results_processed_(*) --new_param merge_and_compute_IC)/HPO_IC.txt -m 'lin' -p phenotypes -T 2 $cust_opt
+	# coPatReporter -i !filter_cohorts_*!/processed_(*).txt -o results_processed_(*) -t freq_internal -m 'lin' -p phenotypes -T 2 -f 2 -c chr -d patient_id -s start -e end $cust_opt
+	coPatReporter -i !filter_cohorts_*!/processed_(*).txt -o results_processed_(*) -m 'lin' -p phenotypes -T 2 -f 2 -c chr -d patient_id -s start -e end $cust_opt
+}
+
+cluster_fun_ORA_[$all_cohorts]){
+	resources: -m 20 -c 6
+	genome_version=`grep (*) $custom_options | cut -f 3`
+	mkdir temp
+	annotate_regions.rb -i !clustering_processed_cohort_*!/processed_(*).txt --gtf $annotation_path/$genome_version/annotation.gtf -o temp/patient_genes.txt
+	get_cluster_genes.rb -c !clustering_processed_cohort_*!/temp/lin_clusters.txt -g temp/patient_genes.txt -o temp/cluster_genes.txt
+	?
+	clusters_to_enrichment.R -i temp/cluster_genes.txt -w 6 -t 4 -k "ENSEMBL" -o functional_enrichment
 }

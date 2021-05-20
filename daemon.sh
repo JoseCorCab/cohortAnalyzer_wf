@@ -2,6 +2,7 @@
 
 source ~soft_bio_267/initializes/init_autoflow
 CODE_PATH=`pwd`
+export PATH=$CODE_PATH/aux_scripts:$PATH
 
 mode=$1
 af_add_options=$2
@@ -20,11 +21,12 @@ if [ "$mode" == "1" ]; then
 	cohorts='decipher;pmm2_CDG;id_mca'
 	cohorts='pmm2_CDG;id_mca'
 	custom_opt=$CODE_PATH'/custom_opt'
-
+	
 	AF_VARS=`echo -e "
 			\\$all_cohorts=$cohorts,
 			\\$custom_options=$custom_opt,
 			\\$HPO='/mnt/home/users/bio_267_uma/elenarojano/dev_gem/pets/external_data/hp.obo',
+			\\$annotation_path='/mnt/home/users/pab_001_uma/pedro/references',
 			\\$cohorts_path=$cohorts_path
 	 " | tr -d [:space:]`
 

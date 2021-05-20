@@ -1,3 +1,5 @@
-decipher	-C 25 -c chr -d patient_id -s start -e end -n -f 2
-id_mca	-C 25 -d patient_id
-pmm2_CDG	-C 25 -c chr -d patient_id -s start -e stop
+#cohort	options	genome_version
+decipher	-C 25 -n	hsGRc38
+full_id_mca	-C 25	hsGRc37
+id_mca	-C 25	hsGRc37
+pmm2_CDG	-C 25	hsGRc37
