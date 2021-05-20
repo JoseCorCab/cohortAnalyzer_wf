@@ -46,21 +46,21 @@ end
 
 
 def annotate_regions(parsed_gtf, all_regions)
-	pacient_genes = {}
-	all_regions.each do |pacient_id, regions|
-		pacient_id = pacient_id.to_sym
-		pacient_genes[pacient_id] = [] if pacient_genes[pacient_id].nil?
+	patient_genes = {}
+	all_regions.each do |patient_id, regions|
+		patient_id = patient_id.to_sym
+		patient_genes[patient_id] = [] if patient_genes[patient_id].nil?
 		regions.each do |chr, reg_start, reg_end|
 			reg_coords = [reg_start, reg_end]
 			chrom_regions = parsed_gtf[chr]
 			chrom_regions.each do |gene_start, gene_stop, ensembl_id|
 				#p ensembl_id
 				gene_coords = [gene_start, gene_stop]
-				pacient_genes[pacient_id] << ensembl_id if region_overlap(gene_coords, reg_coords)
+				patient_genes[patient_id] << ensembl_id if region_overlap(gene_coords, reg_coords)
 			end
 		end
 	end
-	return pacient_genes
+	return patient_genes
 end
 
 def region_overlap(reference_coords, case_coords)
@@ -76,10 +76,11 @@ def region_overlap(reference_coords, case_coords)
 	return overlap_bool
 end
 
-def write_output(pacient_genes, output_file)
+def write_output(patient_genes, output_file)
 	File.open(output_file, 'w') do |outfile|
-		pacient_genes.each do |pacient_id, genes|
-			outfile.puts "#{pacient_id}\t#{genes.join(",")}"
+		patient_genes.each do |patient_id, genes|
+			next if genes.empty?
+			outfile.puts "#{patient_id}\t#{genes.join(",")}"
 		end
 	end
 end
@@ -120,6 +121,6 @@ parsed_gtf = load_and_parse_gtf(options[:annotation_file])
 
 parsed_regions = load_and_parse_regions(options[:input_file])
 
-pacient_genes = annotate_regions(parsed_gtf, parsed_regions)
+patient_genes = annotate_regions(parsed_gtf, parsed_regions)
 
-write_output(pacient_genes, options[:output_file])
+write_output(patient_genes, options[:output_file])
