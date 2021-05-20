@@ -3,7 +3,6 @@
 source ~soft_bio_267/initializes/init_autoflow
 CODE_PATH=`pwd`
 export PATH=$CODE_PATH/aux_scripts:$PATH
-
 mode=$1
 af_add_options=$2
 
@@ -18,8 +17,8 @@ mkdir -p $output_path
 if [ "$mode" == "1" ]; then
 
 	cohorts_path=$CODE_PATH"/cohorts"
-	cohorts='decipher;pmm2_CDG;id_mca'
-	cohorts='pmm2_CDG;id_mca'
+	# cohorts='decipher;pmm2_CDG;id_mca;full_id_mca'
+	cohorts='pmm2_CDG;id_mca;full_id_mca'
 	custom_opt=$CODE_PATH'/custom_opt'
 	
 	AF_VARS=`echo -e "
@@ -41,4 +40,3 @@ elif [ "$mode" == "2" ]; then
 	mv $output_path/results/*.html $output_path/results/general
 
 fi
-
