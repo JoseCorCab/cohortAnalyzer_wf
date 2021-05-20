@@ -4,7 +4,13 @@ convert_ids_to_entrez <- function(ids, gene_keytype){
   possible_ids <- columns(org.Hs.eg.db)
   if(! gene_keytype %in% possible_ids) 
     stop(paste(c("gene keytype must be one of the following:", possible_ids), collapse=" "))
-  mapIds(org.Hs.eg.db, keys=ids, column="ENTREZID", keytype=gene_keytype)
+  ids <- tryCatch(
+    ids <- mapIds(org.Hs.eg.db, keys=ids, column="ENTREZID", keytype=gene_keytype),
+    error=function(cond){
+      ids <- NULL
+    }
+  )
+  return(ids[!is.na(ids)])
 }
 
 multienricher <- function(funsys, cluster_genes_list, task_size, workers){
