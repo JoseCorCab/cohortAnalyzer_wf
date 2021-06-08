@@ -1,12 +1,12 @@
-merge_and_compute_IC){
+%merge_and_compute_IC){
 	resources: -t '01:00:00'
 	source ~soft_bio_267/initializes/init_pets
 	?
 	generate_HPO_IC_table.rb -b $HPO -i "$cohorts_path/*.txt" -o HPO_IC.txt
 }
 
-analyze_raw_cohort_[$all_cohorts]){
-	resources: -m '20gb'
+%analyze_raw_cohort_[$all_cohorts]){
+	resources: -m '20gb' -t '2-00:00:00' -n cal
 	source ~soft_bio_267/initializes/init_pets
 	cust_opt=`grep -P '^(*)' $custom_options | cut -f 2`
 	export ic_file=merge_and_compute_IC)/HPO_IC.txt 
@@ -15,21 +15,23 @@ analyze_raw_cohort_[$all_cohorts]){
 	# coPatReporter.rb -i $cohorts_path/(*).txt -o results_raw_(*) -m '' -p phenotypes -T [cpu] -f 2 -c chr -d patient_id -s start -e stop $cust_opt
 }
 
-filter_cohorts_[$all_cohorts]){
+%filter_cohorts_[$all_cohorts]){
+	source ~soft_bio_267/initializes/init_pets
+	profile_cleaner.rb -i $cohorts_path/(*).txt -f filtered_(*).txt -o $HPO -P
 	?
-	filter_profiles.rb -i $cohorts_path/(*).txt -c "phenotypes" -p 2 -H -o processed_(*).txt
+	filter_profiles.rb -i filtered_(*).txt -c "phenotypes" -p 2 -H -o processed_(*).txt > rejected_patients
 }
 
-analyze_processed_cohort_IC_[$all_cohorts]){
-	resources: -m '20gb'
+%analyze_processed_cohort_IC_[$all_cohorts]){
+	resources: -m '20gb' -t '2-00:00:00' -n cal
 	source ~soft_bio_267/initializes/init_pets
 	cust_opt=`grep -P '^(*)' $custom_options | cut -f 2`
 	?	 
 	coPatReporter.rb -i !filter_cohorts_*!/processed_(*).txt -o result_processed_cohort_IC_(*) -m '' -p phenotypes -T [cpu] -f 2 -c chr -d patient_id -s start -e stop $cust_opt
 }
 
-clustering_processed_cohort_[$all_cohorts]){
-	resources: -m '20gb'
+%clustering_processed_cohort_[$all_cohorts]){
+	resources: -m '20gb' -t '2-00:00:00' -n cal 
 	source ~soft_bio_267/initializes/init_pets
 	export ic_file=merge_and_compute_IC)/HPO_IC.txt
 	cust_opt=`grep -P '^(*)' $custom_options | cut -f 2`
@@ -39,11 +41,35 @@ clustering_processed_cohort_[$all_cohorts]){
 }
 
 cluster_fun_ORA_[$all_cohorts]){
-	resources: -m 20 -c 6
+	resources: -m '20gb' -c 16 -n cal
+	source ~soft_bio_267/initializes/init_degenes_hunter
+	source ~soft_bio_267/initializes/init_ruby
+	export PATH=/mnt/home/soft/soft_bio_267/programs/x86_64/rvm/gems/ruby-3.0.0/gems/pets-0.2.3/external_code:$PATH
+	export PATH=~/software/pets/external_code:$PATH
+	echo [cpu]
 	genome_version=`grep -P '^(*)' $custom_options | cut -f 3`
+	extra_opt=`grep -P '^(*)' $custom_options | cut -f 4`
+	# rm -r temp functional_enrichment 
 	mkdir temp
 	annotate_regions.rb -i !filter_cohorts_*!/processed_(*).txt --gtf $annotation_path'/'$genome_version'/annotation.gtf' -o temp/patient_genes.txt
-	get_cluster_genes.rb -c !clustering_processed_cohort_*!/temp/lin_clusters.txt -g temp/patient_genes.txt -o temp/cluster_genes.txt
+	get_cluster_genes.rb -c !clustering_processed_cohort_*!/temp/lin_clusters.txt -g temp/patient_genes.txt -o temp/cluster_genes.txt $extra_opt > patient_genes
 	?
-	clusters_to_enrichment.R -i temp/cluster_genes.txt -w [cpu] -t 4 -k "ENSEMBL" -o functional_enrichment
+	clusters_to_enrichment.R -i temp/cluster_genes.txt -w 5 -t 4 -k "ENSEMBL" -g patient_genes -p 0.05 -o (*)
+	rm dsi_matrix
+	for enr_file in `ls (*)_functional_enrichment/enrichment_*.csv`; do 
+		funsys=`echo $enr_file | sed 's/.csv//g' | cut -f 2 -d '/' | cut -f 2 -d "_"`
+		clust_out='enrichment_'$funsys"_clust"
+		semantic_similarity_enrichment.rb -i $enr_file -o temp/'matrix_sim_(*)_enrichment_'$funsys -b $GO
+		awk -v funsys=$funsys -v cohort=(*) '{IFS="\t";OFS="\t"}{print $0,funsys,cohort}' < temp/'matrix_sim_(*)_enrichment_'$funsys'_dsi_dist' | sed 's/Infinity/Inf/g' >> dsi_matrix
+		plot_heatmap.R -d temp/'matrix_sim_(*)_enrichment_'$funsys -o '(*)_functional_enrichment/enrichment_'$funsys'_clust' -m comp1 -t dynamic -H -D 1 -S
+		compare_dendograms.R -d !clustering_processed_cohort_*!/temp/lin_dendrogram_groups.RData -D (*)_functional_enrichment/'enrichment_'$funsys'_clust_dendrogram_groups.RData' -o '(*)_functional_enrichment/enrichment_'$funsys'_clust_comparison' -p
+	done
+}
+
+%generate_sim_distribution){
+	resources: -m '20gb' -c 16 -n cal
+	source ~soft_bio_267/initializes/init_R
+	sim_tables=`echo !clustering_processed_cohort_!/temp | tr " " ","`
+	?
+	generate_boxpot.R -i $sim_tables -t `echo '$all_cohorts' | tr ";" ","` -o sim_dist 1> cohort_stats
 }

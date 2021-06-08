@@ -1,5 +1,5 @@
-#cohort	options	genome_version
-decipher	-C 25 -n	hsGRc38
-full_id_mca	-C 25	hsGRc37
-id_mca	-C 25	hsGRc37
-pmm2_CDG	-C 25	hsGRc37
+#cohort	options	genome_version	min_pat_by_gene
+decipher	-C 25	hsGRc38	-m 4
+full_id_mca	-C 25 -G hg18	NCBI36	-m 2
+pmm2_CDG	-C 25 -G hg19	hsGRc37	-m 0
+enod	-C 25 -G hg19	hsGRc37	-m 2

@@ -54,7 +54,6 @@ def annotate_regions(parsed_gtf, all_regions)
 			reg_coords = [reg_start, reg_end]
 			chrom_regions = parsed_gtf[chr]
 			chrom_regions.each do |gene_start, gene_stop, ensembl_id|
-				#p ensembl_id
 				gene_coords = [gene_start, gene_stop]
 				patient_genes[patient_id] << ensembl_id if region_overlap(gene_coords, reg_coords)
 			end

@@ -46,9 +46,27 @@ def get_cluster_genes(patient_genes, patient_clusters)
 		cluster = patient_clusters[patient_id]
 		next if cluster.nil?
 		cluster_genes[cluster] = [] if cluster_genes[cluster].nil?
-		cluster_genes[cluster] = genes | cluster_genes[cluster]
+		cluster_genes[cluster] << genes 
 	end
 	return cluster_genes
+end
+
+def parse_and_filter(clusters_genes, min_patients)
+	parsed_cluster_genes = {}
+	puts ["cluster", "geneid", "patient_count"].join("\t")
+	clusters_genes.each do |cluster, genes|
+		cluster_genes = Hash.new(0)
+		genes.flatten!
+		genes.each do |gene|
+			cluster_genes[gene] += 1
+		end
+		cluster_genes = cluster_genes.select{|gene, patients| patients >= min_patients}
+		cluster_genes.each do |gene, patients|
+			puts [cluster, gene, patients].join("\t")
+		end
+		parsed_cluster_genes[cluster] = cluster_genes.keys unless cluster_genes.empty?
+	end
+	return parsed_cluster_genes
 end
 
 def write_output(cluster_genes, output_file)
@@ -75,6 +93,11 @@ OptionParser.new do |opts|
     options[:patient2gene] = data
   end
 
+  options[:min_patients] = 1
+  opts.on("-m INT", "--min_patients INT", "Minimun number of patients in cluster supporting a gene. Default = #{options[:min_patientsn]}.") do |int|
+    options[:min_patients] = int.to_i
+  end
+
   options[:output_file] = nil
   opts.on("-o", "--output_file PATH", "Output file") do |data|
     options[:output_file] = data
@@ -93,5 +116,6 @@ end.parse!
 patient_genes = load_patient_genes(options[:patient2gene])
 patient_clusters = load_clusters(options[:patients2clusters])
 cluster_genes = get_cluster_genes(patient_genes, patient_clusters)
-write_output(cluster_genes, options[:output_file])
+cluster_genes2 = parse_and_filter(cluster_genes, options[:min_patients]) 
+write_output(cluster_genes2, options[:output_file])
 

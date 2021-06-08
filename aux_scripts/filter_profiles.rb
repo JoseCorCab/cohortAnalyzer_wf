@@ -11,13 +11,18 @@ def load_profile(file_name, header, column_to_filter)
 	profiles = []
 	header_line = ""
 	File.readlines(file_name).each_with_index do |line, line_count|
-		line = line.chomp.split("\t")
-		if header && line_count == 0
+		line = line.chomp.split("\t", 5)
+    if header && line_count == 0
 			header_line = line
 			column_to_filter = line.index(column_to_filter) if !column_to_filter.nil?
 		else
-			phenotypes = line[column_to_filter]
-			profiles << [phenotypes.length,  line]
+      phenotypes = line[column_to_filter].split("|")
+			if phenotypes.empty?
+        puts line.first + "\tpatient has no phenotypes"
+        next
+      end
+     # p phenotypes.length
+      profiles << [phenotypes.length,  line]
 		end
 	end
 	profiles = [header_line.join("\t"), profiles]
@@ -30,6 +35,7 @@ def filter_and_save(profiles, output_file, minimun_phen_count)
 	File.open(output_file, 'w') do |outfile|
 		outfile.puts header
 		profiles.each do |phen_count, profile|
+      #puts phen_count
 			outfile.puts profile.join("\t") if phen_count > minimun_phen_count
 		end
 	end
