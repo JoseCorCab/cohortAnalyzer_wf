@@ -4,6 +4,8 @@ This repository includes a workflow that automate the PETS script *coPatReorter.
 
 Downloading and configuration:
 
+N.B. The user must have Ruby and R installed.
+
 	$ git clone git@github.com:JoseCorCab/cohortAnalyzer_wf.git --recurse-submodules
 
 	$ gem install pets
