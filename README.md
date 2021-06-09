@@ -10,7 +10,7 @@ Downloading and configuration:
 
 * Rscript -e 'install.packages("devtools", repos="http://cran.us.r-project.org")'
 * Rscript -e 'devtools::install_github("seoanezonjic/ExpHunterSuite", dependencies=TRUE)'
-* 
+
 * export PATH=/path/to/cohortAnalyzer_wf/sys_bio_lab_scripts/scripts:$PATH
 * export PATH=/path/to/R/libs/ExpHunterSuite/scripts:$PATH
 
