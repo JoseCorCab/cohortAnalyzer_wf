@@ -4,15 +4,15 @@ This repository includes a workflow that automate the PETS script *coPatReorter.
 
 Downloading and configuration:
 
-$ git clone cohortAnalyzer_wf --recurse-submodules
+	$ git clone git@github.com:JoseCorCab/cohortAnalyzer_wf.git --recurse-submodules
 
-$ gem install pets
+	$ gem install pets
 
-$ Rscript -e 'install.packages("devtools", repos="http://cran.us.r-project.org")'
-$ Rscript -e 'devtools::install_github("seoanezonjic/ExpHunterSuite", dependencies=TRUE)'
+	$ Rscript -e 'install.packages("devtools", repos="http://cran.us.r-project.org")'
+	$ Rscript -e 'devtools::install_github("seoanezonjic/ExpHunterSuite", dependencies=TRUE)'
 
-$ export PATH=/path/to/cohortAnalyzer_wf/sys_bio_lab_scripts/scripts:$PATH
-$ export PATH=/path/to/R/libs/ExpHunterSuite/scripts:$PATH
+	$ export PATH=/path/to/cohortAnalyzer_wf/sys_bio_lab_scripts/scripts:$PATH
+	$ export PATH=/path/to/R/libs/ExpHunterSuite/scripts:$PATH
 
 
 The workflow can be configured by modifying the main executable: daemon.sh
