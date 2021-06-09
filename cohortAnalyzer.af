@@ -69,6 +69,7 @@ cluster_fun_ORA_[$all_cohorts]){
 %generate_sim_distribution){
 	resources: -m '20gb' -c 16 -n cal
 	source ~soft_bio_267/initializes/init_R
+	source ~soft_bio_267/initializes/init_pets
 	sim_tables=`echo !clustering_processed_cohort_!/temp | tr " " ","`
 	?
 	generate_boxpot.R -i $sim_tables -t `echo '$all_cohorts' | tr ";" ","` -o sim_dist 1> cohort_stats
