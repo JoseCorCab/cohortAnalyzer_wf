@@ -9,26 +9,37 @@ af_add_options=$2
 if [ ! -d $CODE_PATH/cohorts ]; then
 	$CODE_PATH/link_cohorts.sh
 fi
+custom_opt=$CODE_PATH'/custom_opt' 
+cohorts_path=$CODE_PATH"/cohorts" 
 
-output_path=$SCRATCH/phenotypes/cohortAnalyzer_wf
+
+###### SETTINGS TO EDIT
+########################################################
+########################################################
+
+output_path=$SCRATCH/phenotypes/cohortAnalyzer_wf #define output folder
+cohorts='decipher;pmm2_CDG;enod;full_id_mca' #semicolon separated names of cohorts to execute, cohorts names must match with first column in custom_opt file and PACO files in $cohorts_path (without extension)
+# cohorts='%decipher;%pmm2_CDG;%full_id_mca;enod'
+# cohorts='pmm2_CDG;id_mca;full_id_mca'
+path_to_hpo='/mnt/home/users/bio_267_uma/elenarojano/dev_gem/pets/external_data/hp.obo' #define path to HPO file in OBO format
+path_to_GO=$CODE_PATH/go-basic.obo  #define path to GO file in OBO format
+path_to_annotations='/mnt/home/users/pab_001_uma/pedro/references' #define path to genome_version folder (must be configured in custom_opt file) that includes an annotation.gtf file
+
+########################################################
+########################################################
+
 mkdir -p $output_path
-
 
 if [ "$mode" == "1" ]; then
 
-	cohorts_path=$CODE_PATH"/cohorts"
-	cohorts='decipher;pmm2_CDG;enod;full_id_mca'
-	# cohorts='%decipher;%pmm2_CDG;%full_id_mca;enod'
-	# cohorts='pmm2_CDG;id_mca;full_id_mca'
-	custom_opt=$CODE_PATH'/custom_opt'
-	
+
 	AF_VARS=`echo -e "
-			\\$all_cohorts=$cohorts,
+			\\$all_cohorts=$cohorts, 
 			\\$custom_options=$custom_opt,
-			\\$HPO='/mnt/home/users/bio_267_uma/elenarojano/dev_gem/pets/external_data/hp.obo',
-			\\$annotation_path='/mnt/home/users/pab_001_uma/pedro/references',
+			\\$HPO=$path_to_hpo, 
+			\\$annotation_path=$path_to_annotations,
 			\\$cohorts_path=$cohorts_path,
-			\\$GO=$CODE_PATH/go-basic.obo
+			\\$GO=$path_to_GO 
 	 " | tr -d [:space:]`
 
 
