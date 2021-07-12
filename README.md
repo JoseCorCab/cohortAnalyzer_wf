@@ -27,9 +27,9 @@ N.B. The user must have Ruby and R installed.
 
 ### Download
 * First you need to download and rename some files to launch the workflow:
-	+ HPO obo file -> *folder_to_HPO/hpo.obo*
-	+ GO obo file -> *path_to_GO/go-basic.obo*
-	+ Annotation of reference genome -> *path_to_genomes*/*genome_name*/annotation.gtf
+	+ HPO obo file -> **folder_to_HPO/hpo.obo**
+	+ GO obo file -> **path_to_GO/go-basic.obo**
+	+ Annotation of reference genome -> **path_to_genomes**/**genome_name**/annotation.gtf
 
 After that you need to create a *cohorts* folder inside cohortAnalyzer_wf directory. 
 
@@ -41,31 +41,27 @@ You can download this example from https://github.com/ElenaRojano/pets/blob/mast
 
 
 ### Defining variables of daemon.sh
-Once requested files have been configured some variables from daemon.sh must be correctly defined:
 
-*output_path*: define output folder
-*cohorts*: semicolon separated names of cohorts to execute. If there are more than one cohort, names must be separated by semicolon
-	In the case of the example:	
-	
-	$ cohorts='hummu_congenital_full_dataset' 	
-
-*path_to_hpo*: define path to HPO file in OBO format (where it was downloaded in the previous section *folder_to_HPO/hpo.obo* )
-*path_to_GO*: define path to GO file in OBO format (where it was downloaded in the previous section *path_to_GO/go-basic.obo* )
-*path_to_annotations*: define path to genomes folder. This variable is equal to *path_to_genomes* from the previous section. *genome_name* must be configured in _custom_opt_
+* Once requested files have been configured some variables from daemon.sh must be correctly defined:
+	+ **output_path**: define output folder
+	+ **cohorts**: semicolon separated names of cohorts to execute. If there are more than one cohort, names must be separated by semicolon. In the case of the example: cohorts='hummu_congenital_full_dataset'
+	+ **path_to_hpo**: define path to HPO file in OBO format (where it was downloaded in the previous section **folder_to_HPO/hpo.obo** )
+	+ **path_to_GO**: define path to GO file in OBO format (where it was downloaded in the previous section **path_to_GO/go-basic.obo** )
+	+ **path_to_annotations**: define path to genomes folder. This variable is equal to **path_to_genomes** from the previous section. **genome_name** must be configured in *custom_opt*
 
 
 ### Additional options for cohorts
-When working with different cohorts, sometimes you need to configure custom options for each. We create the custom_opt file to solve this problem. 
+When working with different cohorts, sometimes you need to configure custom options for each. We create the *custom_opt* file to solve this problem. 
 
 * This file has 4 columns separated by tabs:
 	+ cohort # name of the cohort. On this example would be hummu_congenital_full_dataset
 	+ coPatReporter_custom_options	#additional options for coPatReporter.rb script. See https://github.com/ElenaRojano/pets for more information. Set an empty string to ignore
-	+ genome_version # Define the *genome_name* where you saved the annotation.gtf 
+	+ genome_version # Define the **genome_name** where you saved the annotation.gtf 
 	+ min_pat_by_gene # extra options for get_cluster_genes.rb script. Set an empty string to ignore
 
 ## Launch workflow
 
-* This workflow is divided in two steps. 1º: Main cohortAnalyzer workflow can be executed giving '1' as fisrt argument to daemon.sh. 2º: Results are summarized executing daemon.sh with '2' as first argument.
+This workflow is divided in two steps. 1º: Main cohortAnalyzer workflow can be executed giving '1' as fisrt argument to daemon.sh. 2º: Results are summarized executing daemon.sh with '2' as first argument:
 
 	$ ./daemon.sh 1 #launches complete workflow
 	$ ./daemon.sh 2 #Sumarizes all results from main workflow
