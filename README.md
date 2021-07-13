@@ -1,6 +1,6 @@
 # cohortAnalyzer_wf
 
-This repository includes a workflow that automate the PETS script *coPatReorter.rb* https://github.com/ElenaRojano/pets, that can analyse and clean patient cohorts phenotyped using HPO terms. This workflow also clusterizes patients on each cohort by phenotype. 
+This repository includes a workflow that automate the PETS script *coPatReorter.rb* https://github.com/ElenaRojano/pets, that can analyse and clean patient cohorts phenotyped using HPO terms. This workflow also clusterizes patients on each cohort by phenotype. Analysis and clustering of cohorts included in the paper are stored in **results_paper** folder
 
 ## *Installation and dependencies:* 
 N.B. The user must have Ruby and R installed.
